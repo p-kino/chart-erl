@@ -29,7 +29,7 @@ server(S) ->
             case orddict:find(Pid, S#state.users) of
                 {ok, Name} ->
                     NewUsers = orddict:erase(Pid, S#state.users),
-                    %% clientのプロセスを殺す
+                    exit(Pid, logout),
                     Notification = {admin, Name + "が退室しました"},
                     broadcast(Notification, NewUsers),
 
@@ -37,8 +37,23 @@ server(S) ->
                         NewUsers,
                         [Notification | S#state.chat_log]
                     })
-            end
-    end.
+            end;
+        {'DOWN', _, _, Pid, _} ->
+            case orddict:find(Pid, S#state.users) of
+                {ok, Name} ->
+                    NewUsers = orddict:erase(Pid, S#state.users),
+                    Notification = {admin, Name + "が退室しました"},
+                    broadcast(Notification, NewUsers),
+
+                    server({
+                        NewUsers,
+                        [Notification | S#state.chat_log]
+                    })
+            end;
+        Unknown ->
+            io:format("Unknown message: ~p~n", [Unknown]),
+            server(S)
+        end.
 
 is_valid_new_user(Pid, Name, S) ->
     not orddict:is_key(Pid, S#state.users) andalso
