@@ -44,12 +44,13 @@ server(S) ->
                     NewUsers = orddict:erase(Pid, S#state.users),
                     Notification = {admin, Name + "が退室しました"},
                     broadcast(Notification, NewUsers),
-
                     server({
                         NewUsers,
                         [Notification | S#state.chat_history]
                     })
             end;
+        shutdown ->
+            lists:foreach(fun({K, _}) -> exit(K, server_shutdown) end, orddict:to_list());
         Unknown ->
             io:format("Unknown message: ~p~n", [Unknown]),
             server(S)
