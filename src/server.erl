@@ -22,7 +22,7 @@ server(S) ->
                         [Notification | S#state.chat_history]
                     });
                 true ->
-                    %% 名前が使用中であることを通知する
+                    Pid ! used_name,
                     server(S)
             end;
         {logout, Pid} ->
@@ -57,6 +57,7 @@ server(S) ->
 
 is_valid_new_user(Pid, Name, S) ->
     not orddict:is_key(Pid, S#state.users) andalso
+        Name =/= "admin" andalso
         orddict:is_empty(orddict:filter(fun (_, V) -> V == Name end, S#state.users)).
 
 broadcast(Message, Users) ->
