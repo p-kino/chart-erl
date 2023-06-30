@@ -2,7 +2,7 @@
 -export().
 
 -record(state, {users=orddict:new(),
-                chat_log=[]}).
+                chat_history=[]}).
 
 -record(message, {user_name,
                   content}).
@@ -14,12 +14,12 @@ server(S) ->
             case is_valid_new_user(Pid, Name, S) of
                 false ->
                     %% clientのプロセスをspawn_monitorしてPidを返す
-                    %% clientのPidにchat_logを送る
+                    %% clientのPidにchat_historyを送る
                     Notification = {admin, Name + "が入室しました"},
                     broadcast(Notification, S#state.users),
                     server({
                         orddict:append(Pid, Name, S#state.users),
-                        [Notification | S#state.chat_log]
+                        [Notification | S#state.chat_history]
                     });
                 true ->
                     %% 名前が使用中であることを通知する
@@ -35,7 +35,7 @@ server(S) ->
 
                     server({
                         NewUsers,
-                        [Notification | S#state.chat_log]
+                        [Notification | S#state.chat_history]
                     })
             end;
         {'DOWN', _, _, Pid, _} ->
@@ -47,7 +47,7 @@ server(S) ->
 
                     server({
                         NewUsers,
-                        [Notification | S#state.chat_log]
+                        [Notification | S#state.chat_history]
                     })
             end;
         Unknown ->
