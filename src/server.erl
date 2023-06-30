@@ -15,7 +15,7 @@ server(S) ->
                 false ->
                     monitor(process, Pid),
                     Pid ! {ok, S#state.chat_history},
-                    Notification = {admin, Name + "が入室しました"},
+                    Notification = {"admin", Name + "が入室しました"},
                     broadcast(Notification, S#state.users),
                     server({
                         orddict:append(Pid, Name, S#state.users),
@@ -30,7 +30,7 @@ server(S) ->
                 {ok, Name} ->
                     NewUsers = orddict:erase(Pid, S#state.users),
                     exit(Pid, logout),
-                    Notification = {admin, Name + "が退室しました"},
+                    Notification = {"admin", Name + "が退室しました"},
                     broadcast(Notification, NewUsers),
                     server({
                         NewUsers,
@@ -41,7 +41,7 @@ server(S) ->
             case orddict:find(Pid, S#state.users) of
                 {ok, Name} ->
                     NewUsers = orddict:erase(Pid, S#state.users),
-                    Notification = {admin, Name + "が退室しました"},
+                    Notification = {"admin", Name + "が退室しました"},
                     broadcast(Notification, NewUsers),
                     server({
                         NewUsers,
