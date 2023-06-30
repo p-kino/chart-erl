@@ -14,7 +14,7 @@ server(S) ->
             case is_valid_new_user(Pid, Name, S) of
                 false ->
                     monitor(process, Pid),
-                    Pid ! {login, ok, S#state.chat_history},
+                    Pid ! {ok, S#state.chat_history},
                     Notification = {admin, Name + "が入室しました"},
                     broadcast(Notification, S#state.users),
                     server({
@@ -32,7 +32,6 @@ server(S) ->
                     exit(Pid, logout),
                     Notification = {admin, Name + "が退室しました"},
                     broadcast(Notification, NewUsers),
-
                     server({
                         NewUsers,
                         [Notification | S#state.chat_history]
