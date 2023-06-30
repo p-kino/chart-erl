@@ -13,8 +13,8 @@ server(S) ->
         {login, Pid, Name} ->
             case is_valid_new_user(Pid, Name, S) of
                 false ->
-                    %% clientのプロセスをspawn_monitorしてPidを返す
-                    %% clientのPidにchat_historyを送る
+                    monitor(process, Pid),
+                    Pid ! {login, ok, S#state.chat_history},
                     Notification = {admin, Name + "が入室しました"},
                     broadcast(Notification, S#state.users),
                     server({
