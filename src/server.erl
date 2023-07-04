@@ -34,6 +34,9 @@ server(S) ->
                       S#state.users,
                       [Message | S#state.chat_history]
                     });
+                error ->
+                    Pid ! invalid_user
+            end;
         {logout, Pid} ->
             case orddict:find(Pid, S#state.users) of
                 {ok, Name} ->
@@ -44,7 +47,9 @@ server(S) ->
                     server({
                         NewUsers,
                         [Notification | S#state.chat_history]
-                    })
+                    });
+                error ->
+                    Pid ! invalid_user
             end;
         {'DOWN', _, _, Pid, _} ->
             case orddict:find(Pid, S#state.users) of
