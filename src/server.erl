@@ -25,6 +25,15 @@ server(S) ->
                     Pid ! used_name,
                     server(S)
             end;
+        {post, Pid, M} ->
+            case orddict:find(Pid, S#state.users) of
+                {ok, Name} ->
+                    Message = {Name, M},
+                    bloadcast(Message, S#state.users),
+                    server({
+                      S#state.users,
+                      [Message | S#state.chat_history]
+                    });
         {logout, Pid} ->
             case orddict:find(Pid, S#state.users) of
                 {ok, Name} ->
